@@ -1,10 +1,7 @@
 package functions
 
 import (
-	"bytes"
-	"fmt"
-	"log"
-	"os"
+	"database/sql"
 	"os/exec"
 	"strings"
 	"time"
@@ -16,14 +13,6 @@ func CheckShh() {
 		str     string
 		textMes = " подключен по shh к suse-pc\n"
 	)
-
-	sshLog, err := os.OpenFile("../shh.log",
-		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-
-	if err != nil {
-		log.Println("Не удалось открыть файл sshLog", err)
-	}
-	defer sshLog.Close()
 
 	for {
 		out, _ := exec.Command(command).Output()
@@ -40,26 +29,14 @@ func CheckShh() {
 			word := str[0:spaceIndex]
 
 			if word[1] == '1' && word[2] == '0' && word[3] == '.' {
-				exec.Command("kdialog", "--passivepopup", word[sOpenIndex+1:sCloseIndex]+textMes).Output()
 
-				var b bytes.Buffer
-				b.WriteString(fmt.Sprintf(tm + " " + word[sOpenIndex+1:sCloseIndex] + textMes))
-				_, err = sshLog.Write(b.Bytes())
-				if err != nil {
-					fmt.Println("Не смогли записать в файл", err)
-					return
-				}
+				exec.Command("kdialog", "--passivepopup", word[sOpenIndex+1:sCloseIndex]+textMes).Output()
+				addSql(tm, word, sOpenIndex, sCloseIndex, textMes)
 
 			} else if word[1] == '1' && word[2] == '9' && word[3] == '2' && word[4] == '.' {
-				exec.Command("kdialog", "--passivepopup", word[sOpenIndex+1:sCloseIndex]+textMes).Output()
 
-				var b bytes.Buffer
-				b.WriteString(fmt.Sprintf(tm + " " + word[sOpenIndex+1:sCloseIndex] + textMes))
-				_, err = sshLog.Write(b.Bytes())
-				if err != nil {
-					fmt.Println("Не смогли записать в файл", err)
-					return
-				}
+				exec.Command("kdialog", "--passivepopup", word[sOpenIndex+1:sCloseIndex]+textMes).Output()
+				addSql(tm, word, sOpenIndex, sCloseIndex, textMes)
 			}
 			str = str[spaceIndex+1:]
 			str = strings.Trim(str, space)
@@ -68,28 +45,30 @@ func CheckShh() {
 		if str[1] == '1' && str[2] == '0' && str[3] == '.' {
 			sOpenIndex := strings.Index(str, sOpen)
 			sCloseIndex := strings.Index(str, sClose)
-			exec.Command("kdialog", "--passivepopup", str[sOpenIndex+1:sCloseIndex]+textMes).Output()
 
-			var b bytes.Buffer
-			b.WriteString(fmt.Sprintf(tm + " " + str[sOpenIndex+1:sCloseIndex] + textMes))
-			_, err = sshLog.Write(b.Bytes())
-			if err != nil {
-				fmt.Println("Не смогли записать в файл", err)
-				return
-			}
+			exec.Command("kdialog", "--passivepopup", str[sOpenIndex+1:sCloseIndex]+textMes).Output()
+			addSql(tm, str, sOpenIndex, sCloseIndex, textMes)
+
 		} else if str[1] == '1' && str[2] == '9' && str[3] == '2' && str[4] == '.' {
 			sOpenIndex := strings.Index(str, sOpen)
 			sCloseIndex := strings.Index(str, sClose)
-			exec.Command("kdialog", "--passivepopup", str[sOpenIndex+1:sCloseIndex]+textMes).Output()
 
-			var b bytes.Buffer
-			b.WriteString(fmt.Sprintf(tm + " " + str[sOpenIndex+1:sCloseIndex] + textMes))
-			_, err = sshLog.Write(b.Bytes())
-			if err != nil {
-				fmt.Println("Не смогли записать в файл", err)
-				return
-			}
+			exec.Command("kdialog", "--passivepopup", str[sOpenIndex+1:sCloseIndex]+textMes).Output()
+			addSql(tm, str, sOpenIndex, sCloseIndex, textMes)
 		}
 		time.Sleep(20 * time.Second)
+	}
+}
+
+func addSql(tm string, word string, sOpenIndex int, sCloseIndex int, textMes string) {
+	db, err := sql.Open("mysql", "usersql:Nomu8@RAmBat@tcp(10.101.2.194:3306)/Check")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+	_, err = db.Exec("insert into Check.log_ssh (time, ip, text) values (?, ?,?)",
+		tm, word[sOpenIndex+1:sCloseIndex], textMes)
+	if err != nil {
+		panic(err)
 	}
 }

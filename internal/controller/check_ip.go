@@ -24,6 +24,13 @@ func NewController(usecase usecase.Usecase) *Controller {
 	}
 }
 
+func buildResponse(w http.ResponseWriter, statusCode int, body []byte) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(statusCode)
+	w.Write(body)
+}
+
+// Обработчик дабовления нового ip для проверки.
 func (c *Controller) AddNewIp(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		user := &entity.Ipcheck{}
@@ -49,12 +56,7 @@ func (c *Controller) AddNewIp(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusBadRequest)
 }
 
-func buildResponse(w http.ResponseWriter, statusCode int, body []byte) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(statusCode)
-	w.Write(body)
-}
-
+// Обработчик для отображения проверяемых ip.
 func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles(filesCheck...)
 	if err != nil {

@@ -69,3 +69,31 @@ func (r *repository) GetAll() []*entity.Ipcheck {
 	}
 	return users
 }
+
+//Получение log_ssh в хранилище
+func (r *repository) GetLogSsh() []*entity.SshLog {
+	db, err := sql.Open("mysql", "usersql:Nomu8@RAmBat@tcp(10.101.2.194:3306)/Check")
+
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+	rows, err := db.Query("select * from Check.log_ssh")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	users := make([]*entity.SshLog, 0)
+
+	for rows.Next() {
+		p := &entity.SshLog{}
+		err = rows.Scan(&p.Id, &p.Time, &p.Ip, &p.Text)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		users = append(users, p)
+	}
+	return users
+}

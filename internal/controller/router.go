@@ -18,9 +18,10 @@ func Build(router *chi.Mux, usecase usecase.Usecase) {
 
 	//// Роуты Тестового полигона
 	router.Get("/", All)
-	router.Get("/KRDC", KRDC)
-	router.Get("/Mikrotik", Mikrotik)
-	router.Get("/Check", Check)
+	router.Get("/krdc", KRDC)
+	router.Get("/mikrotik", Mikrotik)
+	router.Get("/check_net", Check)
+	router.Get("/ssh", controller.GetLogSsh)
 
 	//Подключаем css к controller
 	fileServer := http.FileServer(neuteredFileSystem{http.Dir("../internal/ui/static/")})

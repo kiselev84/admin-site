@@ -9,9 +9,8 @@ type Ipcheck struct {
 }
 
 type SshLog struct {
-	Id     uint8
-	Time   string `json:"time"`
-	Ip     string `json:"ip"`
-	Text   string `json:"text"`
-	Server string `json:"server"`
+	Id   uint8
+	Time string `json:"time"`
+	Ip   string `json:"ip"`
+	Text string `json:"text"`
 }

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"bufio"
+	"fmt"
 	"html"
 	"html/template"
 	"io"
@@ -151,4 +152,40 @@ func Check(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+}
+
+// Обработчик для отображения содержимого log ssh.
+func (c *Controller) GetLogSsh(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles(filesHome...)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+	}
+
+	if r.Method == "GET" {
+		response := ""
+
+		for _, user := range c.usecase.GetLogSsh() {
+			response += fmt.Sprintf("-     id:%v %v %v %v<br/>", user.Id, user.Time, user.Ip, user.Text)
+		}
+
+		_, err = io.WriteString(w, `<html><head><title>Проверка веб-службы</title></head><body><p>&nbsp;</p><h1 style="text-align: left;"><span style="color: #339966;"><strong>
+		  Лог проверки SSH:</strong></span></h1><div></div></body></html>`)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(response))
+
+		return
+	}
+	w.WriteHeader(http.StatusBadRequest)
 }
