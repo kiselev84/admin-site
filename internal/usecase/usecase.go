@@ -7,12 +7,16 @@ type (
 		AddNewIp(*entity.Ipcheck) (uint8, error)
 		GetAll() []*entity.Ipcheck
 		GetLogSsh() []*entity.SshLog
+		GetLogCheckNet() []*entity.CheckNetLog
+		GetLogCheckNetCity(string) []*entity.CheckNetLog
 	}
 
 	Repository interface {
 		AddNewIp(*entity.Ipcheck) (uint8, error)
 		GetAll() []*entity.Ipcheck
 		GetLogSsh() []*entity.SshLog
+		GetLogCheckNet() []*entity.CheckNetLog
+		GetLogCheckNetCity(string) []*entity.CheckNetLog
 	}
 )
 
@@ -41,5 +45,17 @@ func (u *usecase) GetAll() []*entity.Ipcheck {
 // GetLogSsh return log_ssh
 func (u *usecase) GetLogSsh() []*entity.SshLog {
 	users := u.repository.GetLogSsh()
+	return users
+}
+
+// GetLogCheckNet return log_check_net
+func (u *usecase) GetLogCheckNet() []*entity.CheckNetLog {
+	users := u.repository.GetLogCheckNet()
+	return users
+}
+
+// GetLogCheckNetCity return log_check_net_City
+func (u *usecase) GetLogCheckNetCity(city string) []*entity.CheckNetLog {
+	users := u.repository.GetLogCheckNetCity(city)
 	return users
 }

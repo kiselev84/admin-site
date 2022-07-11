@@ -14,3 +14,13 @@ type SshLog struct {
 	Ip   string `json:"ip"`
 	Text string `json:"text"`
 }
+
+type CheckNetLog struct {
+	Id     uint8
+	Time   string `json:"time"`
+	Office string `json:"office"`
+	Ip     string `json:"ip"`
+	City   string `json:"city"`
+	Server string `json:"server"`
+	Text   string `json:"text"`
+}

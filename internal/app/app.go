@@ -11,6 +11,7 @@ import (
 
 func Run() {
 	go functions.CheckShh()
+	go functions.CheckNet()
 
 	repository := repository.NewRepository()
 	usecase := usecase.NewUsecase(repository)

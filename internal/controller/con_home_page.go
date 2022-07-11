@@ -1,14 +1,11 @@
 package controller
 
 import (
-	"bufio"
 	"fmt"
-	"html"
 	"html/template"
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"path/filepath"
 )
 
@@ -57,7 +54,6 @@ func (nfs neuteredFileSystem) Open(path string) (http.File, error) {
 			return nil, err
 		}
 	}
-
 	return f, nil
 
 }
@@ -113,47 +109,6 @@ func Mikrotik(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Обработчик для отображения содержимого chek.
-func Check(w http.ResponseWriter, r *http.Request) {
-
-	ts, err := template.ParseFiles(filesCheck...)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	err = ts.Execute(w, nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-	}
-
-	f1, err := os.Open("/home/kiselev/go/src/project/check/check_ip.log")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	defer f1.Close()
-
-	_, err = io.WriteString(w, `<html><head><title>Проверка веб-службы</title></head><body><p>&nbsp;</p><h1 style="text-align: left;"><span style="color: #339966;"><strong>
-		Общая История проверки:</strong></span></h1><div></div></body></html>`)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	s := bufio.NewScanner(f1)
-
-	for s.Scan() {
-		_, err = io.WriteString(w, html.EscapeString(s.Text())+`<br/>`)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	}
-
-}
-
 // Обработчик для отображения содержимого log ssh.
 func (c *Controller) GetLogSsh(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles(filesHome...)
@@ -181,10 +136,8 @@ func (c *Controller) GetLogSsh(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(response))
-
 		return
 	}
 	w.WriteHeader(http.StatusBadRequest)

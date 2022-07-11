@@ -78,7 +78,7 @@ func (r *repository) GetLogSsh() []*entity.SshLog {
 		panic(err)
 	}
 	defer db.Close()
-	rows, err := db.Query("select * from Check.log_ssh")
+	rows, err := db.Query("select * from Check.log_ssh ORDER BY ID DESC")
 	if err != nil {
 		panic(err)
 	}
@@ -89,6 +89,62 @@ func (r *repository) GetLogSsh() []*entity.SshLog {
 	for rows.Next() {
 		p := &entity.SshLog{}
 		err = rows.Scan(&p.Id, &p.Time, &p.Ip, &p.Text)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		users = append(users, p)
+	}
+	return users
+}
+
+//Получение log_check_net в хранилище
+func (r *repository) GetLogCheckNet() []*entity.CheckNetLog {
+	db, err := sql.Open("mysql", "usersql:Nomu8@RAmBat@tcp(10.101.2.194:3306)/Check")
+
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+	rows, err := db.Query("select * from Check.log_check_net ORDER BY ID DESC")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	users := make([]*entity.CheckNetLog, 0)
+
+	for rows.Next() {
+		p := &entity.CheckNetLog{}
+		err = rows.Scan(&p.Id, &p.Time, &p.Office, &p.Ip, &p.City, &p.Server, &p.Text)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		users = append(users, p)
+	}
+	return users
+}
+
+//Получение log_check_net в хранилище по City
+func (r *repository) GetLogCheckNetCity(city string) []*entity.CheckNetLog {
+	db, err := sql.Open("mysql", "usersql:Nomu8@RAmBat@tcp(10.101.2.194:3306)/Check")
+
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+	rows, err := db.Query("select * from Check.log_check_net WHERE city=? ORDER BY ID DESC", city)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	users := make([]*entity.CheckNetLog, 0)
+
+	for rows.Next() {
+		p := &entity.CheckNetLog{}
+		err = rows.Scan(&p.Id, &p.Time, &p.Office, &p.Ip, &p.City, &p.Server, &p.Text)
 		if err != nil {
 			fmt.Println(err)
 			continue
