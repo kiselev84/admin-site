@@ -27,7 +27,7 @@ func (c *Controller) GetLogCheckNet(w http.ResponseWriter, r *http.Request) {
 		response := ""
 
 		for _, user := range c.usecase.GetLogCheckNet() {
-			response += fmt.Sprintf("-     ID:%v %v %v %v %v %v %v<br/>", user.Id, user.Text, user.Time, user.City, user.Office, user.Server, user.Ip)
+			response += fmt.Sprintf("-     %v %v %v %v %v %v <br/>", user.Time, user.Text, user.City, user.Office, user.Server, user.Ip)
 		}
 
 		_, err = io.WriteString(w, `<html><head><title>Проверка веб-службы</title></head><body><p>&nbsp;</p><h1 style="text-align: left;"><span style="color: #339966;"><strong>
@@ -61,12 +61,12 @@ func (c *Controller) GetLogCheckNetCity(w http.ResponseWriter, r *http.Request) 
 		response := ""
 
 		city := strings.TrimPrefix(r.URL.Path, "/check_net/")
-		for _, user := range c.usecase.GetLogCheckNetCity(string(city)) {
-			response += fmt.Sprintf("-     ID:%v %v %v %v %v %v %v<br/>", user.Id, user.Text, user.Time, user.City, user.Office, user.Server, user.Ip)
+		for _, user := range c.usecase.GetLogCheckNetCity(city) {
+			response += fmt.Sprintf("-     %v %v %v %v %v %v <br/>", user.Time, user.Text, user.City, user.Office, user.Server, user.Ip)
 		}
 
-		_, err = io.WriteString(w, `<html><head><title>Проверка веб-службы</title></head><body><p>&nbsp;</p><h1 style="text-align: left;"><span style="color: #339966;"><strong>
-		  Лог проверки сети по офису city: </strong></span></h1><div></div></body></html>`)
+		_, err = io.WriteString(w, fmt.Sprintf(`<html><head><title>Проверка веб-службы</title></head><body><p>&nbsp;</p><h1 style="text-align: left;"><span style="color: #339966;"><strong>
+		  	 Лог проверки сети по офису %s: </strong></span></h1><div></div></body></html>`, city))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

@@ -30,6 +30,11 @@ var (
 		"../internal/ui/html/base.layout.tmpl",
 		"../internal/ui/html/footer.partial.tmpl",
 	}
+	filesCheckForm = []string{
+		"../internal/ui/html/check_Rostov.page.html",
+		"../internal/ui/html/base.layout.tmpl",
+		"../internal/ui/html/footer.partial.tmpl",
+	}
 )
 
 type neuteredFileSystem struct {
@@ -127,7 +132,7 @@ func (c *Controller) GetLogSsh(w http.ResponseWriter, r *http.Request) {
 		response := ""
 
 		for _, user := range c.usecase.GetLogSsh() {
-			response += fmt.Sprintf("-     id:%v %v %v %v<br/>", user.Id, user.Time, user.Ip, user.Text)
+			response += fmt.Sprintf("-     %v %v %v <br/>", user.Time, user.Text, user.Ip)
 		}
 
 		_, err = io.WriteString(w, `<html><head><title>Проверка веб-службы</title></head><body><p>&nbsp;</p><h1 style="text-align: left;"><span style="color: #339966;"><strong>

@@ -2,7 +2,9 @@ package functions
 
 import (
 	"database/sql"
+	"fmt"
 	"os/exec"
+	"project/test_site/internal/entity"
 	"strings"
 	"time"
 )
@@ -61,7 +63,8 @@ func CheckShh() {
 }
 
 func addSql(tm string, word string, sOpenIndex int, sCloseIndex int, textMes string) {
-	db, err := sql.Open("mysql", "usersql:Nomu8@RAmBat@tcp(10.101.2.194:3306)/Check")
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/Check",
+		entity.UserSql, entity.PassSql, entity.HostSql))
 	if err != nil {
 		panic(err)
 	}

@@ -11,7 +11,8 @@ import (
 
 func CheckNet() {
 
-	db, err := sql.Open("mysql", "usersql:Nomu8@RAmBat@tcp(10.101.2.194:3306)/Check")
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/Check",
+		entity.UserSql, entity.PassSql, entity.HostSql))
 	if err != nil {
 		panic(err)
 	}
@@ -55,7 +56,8 @@ func checkIp(p *entity.Ipcheck) {
 
 		exec.Command("kdialog", "--passivepopup", "100% Потеря канала "+p.Ip+" "+p.City+" "+p.Office).Output()
 
-		db, err := sql.Open("mysql", "usersql:Nomu8@RAmBat@tcp(10.101.2.194:3306)/Check")
+		db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/Check",
+			entity.UserSql, entity.PassSql, entity.HostSql))
 		if err != nil {
 			panic(err)
 		}

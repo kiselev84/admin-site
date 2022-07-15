@@ -14,6 +14,7 @@ func Build(router *chi.Mux, usecase usecase.Usecase) {
 
 	// Роуты для проверяемых ip
 	router.Post("/create", controller.AddNewIp)
+	router.HandleFunc("/addip", controller.AddNewIpForm)
 	router.Get("/ip", controller.GetAll)
 
 	// Роуты Тестового полигона (Home page)

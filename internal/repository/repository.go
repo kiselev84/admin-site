@@ -25,8 +25,8 @@ func (r *repository) AddNewIp(ipcheck *entity.Ipcheck) (uint8, error) {
 	r.Lock()
 	defer r.Unlock()
 
-	db, err := sql.Open("mysql", "usersql:Nomu8@RAmBat@tcp(10.101.2.194:3306)/Check")
-
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/Check",
+		entity.UserSql, entity.PassSql, entity.HostSql))
 	if err != nil {
 		panic(err)
 	}
@@ -44,12 +44,13 @@ func (r *repository) AddNewIp(ipcheck *entity.Ipcheck) (uint8, error) {
 
 //Получение всех ip в хранилище
 func (r *repository) GetAll() []*entity.Ipcheck {
-	db, err := sql.Open("mysql", "usersql:Nomu8@RAmBat@tcp(10.101.2.194:3306)/Check")
-
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/Check",
+		entity.UserSql, entity.PassSql, entity.HostSql))
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
+
 	rows, err := db.Query("select * from Check.ipcheck")
 	if err != nil {
 		panic(err)
@@ -72,8 +73,9 @@ func (r *repository) GetAll() []*entity.Ipcheck {
 
 //Получение log_ssh в хранилище
 func (r *repository) GetLogSsh() []*entity.SshLog {
-	db, err := sql.Open("mysql", "usersql:Nomu8@RAmBat@tcp(10.101.2.194:3306)/Check")
 
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/Check",
+		entity.UserSql, entity.PassSql, entity.HostSql))
 	if err != nil {
 		panic(err)
 	}
@@ -100,7 +102,8 @@ func (r *repository) GetLogSsh() []*entity.SshLog {
 
 //Получение log_check_net в хранилище
 func (r *repository) GetLogCheckNet() []*entity.CheckNetLog {
-	db, err := sql.Open("mysql", "usersql:Nomu8@RAmBat@tcp(10.101.2.194:3306)/Check")
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/Check",
+		entity.UserSql, entity.PassSql, entity.HostSql))
 
 	if err != nil {
 		panic(err)
@@ -128,7 +131,8 @@ func (r *repository) GetLogCheckNet() []*entity.CheckNetLog {
 
 //Получение log_check_net в хранилище по City
 func (r *repository) GetLogCheckNetCity(city string) []*entity.CheckNetLog {
-	db, err := sql.Open("mysql", "usersql:Nomu8@RAmBat@tcp(10.101.2.194:3306)/Check")
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/Check",
+		entity.UserSql, entity.PassSql, entity.HostSql))
 
 	if err != nil {
 		panic(err)
