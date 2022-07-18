@@ -21,7 +21,7 @@ func NewRepository() *repository {
 }
 
 //Добавление проверяемого ip в хранилище
-func (r *repository) AddNewIp(ipcheck *entity.Ipcheck) (uint8, error) {
+func (r *repository) AddNewIp(ipCheck *entity.Ipcheck) (uint8, error) {
 	r.Lock()
 	defer r.Unlock()
 
@@ -33,13 +33,29 @@ func (r *repository) AddNewIp(ipcheck *entity.Ipcheck) (uint8, error) {
 	defer db.Close()
 
 	result, err := db.Exec("insert into Check.ipcheck (office, ip, city, server) values (?, ?,?,?)",
-		ipcheck.Office, ipcheck.Ip, ipcheck.City, ipcheck.Server)
+		ipCheck.Office, ipCheck.Ip, ipCheck.City, ipCheck.Server)
 	if err != nil {
 		panic(err)
 	}
 	id, err := result.LastInsertId()
 
 	return uint8(id), nil
+}
+
+//Обновление Check-ip в хранилище
+func (r *repository) EditCheckIp(ipCheck *entity.Ipcheck) error {
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/Check",
+		entity.UserSql, entity.PassSql, entity.HostSql))
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	if _, err = db.Exec("update Check.ipcheck set office = ?, ip = ?, city = ?, server = ? where id = ?",
+		ipCheck.Office, ipCheck.Ip, ipCheck.City, ipCheck.Server, ipCheck.Id); err != nil {
+		return err
+	}
+	return err
 }
 
 //Получение всех ip в хранилище

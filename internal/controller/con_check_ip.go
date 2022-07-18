@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"project/test_site/internal/entity"
 	"project/test_site/internal/usecase"
+	"strconv"
 )
 
 type Config struct {
@@ -100,17 +101,17 @@ func (c *Controller) AddNewIpForm(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println(err)
 		}
-		ip := &entity.Ipcheck{}
+		newIp := &entity.Ipcheck{}
 
-		ip.Office = r.FormValue("office")
-		ip.Ip = r.FormValue("ip")
-		ip.City = r.FormValue("city")
-		ip.Server = r.FormValue("server")
+		newIp.Office = r.FormValue("office")
+		newIp.Ip = r.FormValue("ip")
+		newIp.City = r.FormValue("city")
+		newIp.Server = r.FormValue("device")
 
 		if err != nil {
 			log.Println(err)
 		}
-		_, err = c.usecase.AddNewIp(ip)
+		_, err = c.usecase.AddNewIp(newIp)
 		if err != nil {
 			buildResponse(w, http.StatusInternalServerError, nil)
 			return
@@ -128,6 +129,52 @@ func (c *Controller) AddNewIpForm(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		http.ServeFile(w, r, "../internal/ui/templates/create.html")
+	}
+
+}
+
+// Обработчик edit-ip Ceck net.
+func (c *Controller) EditCheckIp(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == "POST" {
+
+		err := r.ParseForm()
+		if err != nil {
+			log.Println(err)
+		}
+		editIp := &entity.Ipcheck{}
+
+		id, err := strconv.Atoi(r.FormValue("id"))
+		if err != nil {
+			log.Println(err)
+		}
+		editIp.Id = uint8(id)
+		editIp.Office = r.FormValue("office")
+		editIp.Ip = r.FormValue("ip")
+		editIp.City = r.FormValue("city")
+		editIp.Server = r.FormValue("device")
+
+		if err != nil {
+			log.Println(err)
+		}
+		err = c.usecase.EditCheckIp(editIp)
+		if err != nil {
+			buildResponse(w, http.StatusInternalServerError, nil)
+			return
+		}
+
+		http.Redirect(w, r, "/ip", 301)
+	} else {
+		_, err := io.WriteString(w, `<html><head><title>Проверка веб-службы</title>
+			</head><body><p>&nbsp;</p><h1 style="text-align: left;">
+			<span style="color: #339966;"><strong>Редактирование IP:</strong></span>
+			</h1><div></div></body>
+			</html>`)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		http.ServeFile(w, r, "../internal/ui/templates/edit_check_ip.html")
 	}
 
 }

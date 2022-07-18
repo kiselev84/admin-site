@@ -9,6 +9,7 @@ type (
 		GetLogSsh() []*entity.SshLog
 		GetLogCheckNet() []*entity.CheckNetLog
 		GetLogCheckNetCity(string) []*entity.CheckNetLog
+		EditCheckIp(ipCheck *entity.Ipcheck) error
 	}
 
 	Repository interface {
@@ -17,6 +18,7 @@ type (
 		GetLogSsh() []*entity.SshLog
 		GetLogCheckNet() []*entity.CheckNetLog
 		GetLogCheckNetCity(string) []*entity.CheckNetLog
+		EditCheckIp(ipCheck *entity.Ipcheck) error
 	}
 )
 
@@ -58,4 +60,9 @@ func (u *usecase) GetLogCheckNet() []*entity.CheckNetLog {
 func (u *usecase) GetLogCheckNetCity(city string) []*entity.CheckNetLog {
 	users := u.repository.GetLogCheckNetCity(city)
 	return users
+}
+
+func (u *usecase) EditCheckIp(ipCheck *entity.Ipcheck) error {
+	err := u.repository.EditCheckIp(ipCheck)
+	return err
 }
