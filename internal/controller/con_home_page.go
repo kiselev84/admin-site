@@ -1,9 +1,7 @@
 package controller
 
 import (
-	"fmt"
 	"html/template"
-	"io"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -55,95 +53,87 @@ func (nfs neuteredFileSystem) Open(path string) (http.File, error) {
 			if closeErr != nil {
 				return nil, closeErr
 			}
-
 			return nil, err
 		}
 	}
 	return f, nil
-
 }
 
 // Обработчик главной странице.
 func All(w http.ResponseWriter, r *http.Request) {
-
-	ts, err := template.ParseFiles(filesHome...)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-		return
+	if r.Method == "GET" {
+		http.Redirect(w, r, "/check_net", 301)
 	}
-	err = ts.Execute(w, nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-	}
-
+	w.WriteHeader(http.StatusBadRequest)
 }
 
 // Обработчик для отображения содержимого KRDC.
 func KRDC(w http.ResponseWriter, r *http.Request) {
-
-	ts, err := template.ParseFiles(filesKRDC...)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-		return
+	if r.Method == "GET" {
+		ts, err := template.ParseFiles(filesKRDC...)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error", 500)
+			return
+		}
+		err = ts.Execute(w, nil)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error", 500)
+		}
 	}
-	err = ts.Execute(w, nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-	}
-
+	w.WriteHeader(http.StatusBadRequest)
 }
 
 // Обработчик для отображения содержимого Mikrotik.
 func Mikrotik(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		ts, err := template.ParseFiles(filesHome...)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error", 500)
+			return
+		}
+		err = ts.Execute(w, nil)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error", 500)
+		}
 
-	ts, err := template.ParseFiles(filesMikrotik...)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-		return
+		http.ServeFile(w, r, "../internal/ui/templates/mikrotik.html")
 	}
-	err = ts.Execute(w, nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-	}
-
+	w.WriteHeader(http.StatusBadRequest)
 }
 
 // Обработчик для отображения содержимого log ssh.
 func (c *Controller) GetLogSsh(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles(filesHome...)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	err = ts.Execute(w, nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-	}
-
 	if r.Method == "GET" {
-		response := ""
-
-		for _, user := range c.usecase.GetLogSsh() {
-			response += fmt.Sprintf("-     %v %v %v <br/>", user.Time, user.Text, user.Ip)
-		}
-
-		_, err = io.WriteString(w, `<html><head><title>Проверка веб-службы</title></head><body><p>&nbsp;</p><h1 style="text-align: left;"><span style="color: #339966;"><strong>
-		  Лог проверки SSH:</strong></span></h1><div></div></body></html>`)
+		ts, err := template.ParseFiles(filesHome...)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Println(err.Error())
+			http.Error(w, err.Error(), 500)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(response))
-		return
+		err = ts.Execute(w, nil)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), 500)
+		}
+
+		logSsh := c.usecase.GetLogSsh()
+
+		//указываем путь к файлу с шаблоном
+		tmpl, err := template.ParseFiles("../internal/ui/templates/log_shh.html")
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		//исполняем именованный шаблон "log_ssh", передавая туда массив со списком пользователей
+		err = tmpl.ExecuteTemplate(w, "log_ssh", logSsh)
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
 	}
 	w.WriteHeader(http.StatusBadRequest)
 }

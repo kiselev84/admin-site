@@ -1,0 +1,46 @@
+{{define "check_ip"}}
+
+<html lang="ru" class="h-100">
+<head>
+    <title>Title</title>
+</head>
+<body>
+
+    </ul><div id="tabs-1"><br><table class="curved-vt-2" width=1600>
+    <td colspan=1 class="table-shapka" width=90%>Проверяемые IP</td>
+    <td colspan=13 class="table-mcenter1"><img src='/static/img/logo.png' width="30"></td>
+
+    <td  colspan=1 class="table-mcenter1">
+
+        <a href='http://10.101.3.170:7777/addip' ><button  class="bot1" title="Добавить IP" ><img src="/static/img/add2.png" width="25"></button></a>
+
+    </td>
+
+
+</table><br>
+    <table align=center class="curved-vt-2" width=60%>
+        <th>ID</th>
+        <th>Офис</th>
+        <th>Город</th>
+        <th>IP</th>
+        <th>Устройство</th>
+        <th>Действие</th>
+
+        {{range .}}
+        <tr>
+            <td>{{.Id}}</td>
+            <td>{{.Office}}</td>
+            <td>{{.City}}</td>
+            <td>{{.Ip}}</td>
+            <td>{{.Server}}</td>
+            <td><a href="/edit/{{.Id}}" ><button  class="bot1" title="Редактировать IP" ><img src='/static/img/edit1.png' width="20"></button></a>
+                <a href="/delete/{{.Id}}"><button  class="bot1" title="Удалить IP" ><img src='/static/img/del.png' width="20"></button></a>
+
+        </tr>
+        {{end}}
+    </table>
+    </div>
+</body>
+</html>
+{{end}}
+

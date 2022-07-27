@@ -1,0 +1,32 @@
+{{define "log_ssh"}}
+<!doctype html>
+<html lang="ru" class="h-100">
+<head>
+    <title>Title</title>
+</head>
+<body >
+    </div>
+    </ul><div id="tabs-1"><br><table class="curved-vt-2" width=1600>
+    <td colspan=1 class="table-shapka" width=90%>Лог проверки SSH</td>
+    <td colspan=13 class="table-mcenter1"><img src='/static/img/konsole.png' width="30"></td>
+
+</table><br></div>
+
+    <table align=center class="curved-vt-2" width=60%>
+
+        <th>Время</th>
+        <th>IP</th>
+        <th>Сообщение</th>
+
+        {{range .}}
+        <tr>
+            <td>{{.Time}}</td>
+            <td>{{.Ip}}</td>
+            <td>{{.Text}}</td>
+        </tr>
+        {{end}}
+    </table>
+</body>
+</html>
+{{end}}
+

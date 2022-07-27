@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"project/test_site/internal/entity"
 	"sync"
 
@@ -53,6 +54,7 @@ func (r *repository) EditCheckIp(ipCheck *entity.Ipcheck) error {
 
 	if _, err = db.Exec("update Check.ipcheck set office = ?, ip = ?, city = ?, server = ? where id = ?",
 		ipCheck.Office, ipCheck.Ip, ipCheck.City, ipCheck.Server, ipCheck.Id); err != nil {
+
 		return err
 	}
 	return err
@@ -132,7 +134,7 @@ func (r *repository) GetLogCheckNet() []*entity.CheckNetLog {
 	defer rows.Close()
 
 	users := make([]*entity.CheckNetLog, 0)
-
+	index := 0
 	for rows.Next() {
 		p := &entity.CheckNetLog{}
 		err = rows.Scan(&p.Id, &p.Time, &p.Office, &p.Ip, &p.City, &p.Server, &p.Text)
@@ -141,6 +143,10 @@ func (r *repository) GetLogCheckNet() []*entity.CheckNetLog {
 			continue
 		}
 		users = append(users, p)
+		if index == 3000 {
+			break
+		}
+		index++
 	}
 	return users
 }
@@ -172,4 +178,78 @@ func (r *repository) GetLogCheckNetCity(city string) []*entity.CheckNetLog {
 		users = append(users, p)
 	}
 	return users
+}
+
+//Получение ip-check по идентификатору
+func (r *repository) GetIpCheckId(id string) (*entity.Ipcheck, error) {
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/Check",
+		entity.UserSql, entity.PassSql, entity.HostSql))
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	rows := db.QueryRow("select * from Check.ipcheck WHERE id=?", id)
+	u := &entity.Ipcheck{}
+	err = rows.Scan(&u.Id, &u.Office, &u.Ip, &u.City, &u.Server)
+	if err != nil {
+		log.Println(err)
+	}
+	return u, err
+}
+
+//Удаление ip-check из хранилища
+func (r *repository) DeleteIpCheck(id string) error {
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/Check",
+		entity.UserSql, entity.PassSql, entity.HostSql))
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	//Удаление из списка совсем
+	_, err = db.Exec("DELETE FROM Check.ipcheck WHERE id = ?", id)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return err
+}
+
+//Добавление сообщения log-Net в хранилище
+func (r *repository) AddLogNet(u *entity.Ipcheck, textCheck string, tm string) {
+
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/Check",
+		entity.UserSql, entity.PassSql, entity.HostSql))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer db.Close()
+	_, err = db.Exec("insert into Check.log_check_net (time, office, ip, city, server, text) values (?, ?,?,?,?,?)",
+		tm, u.Office, u.Ip, u.City, u.Server, textCheck)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	return
+}
+
+//Добавление сообщения log-Check-Ssh в хранилище
+func (r *repository) AddLogCheckSsh(tm string, word string, sOpenIndex int, sCloseIndex int, textMes string) {
+
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/Check",
+		entity.UserSql, entity.PassSql, entity.HostSql))
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+	_, err = db.Exec("insert into Check.log_ssh (time, ip, text) values (?, ?,?)",
+		tm, word[sOpenIndex+1:sCloseIndex], textMes)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	return
 }

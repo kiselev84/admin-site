@@ -1,9 +1,7 @@
 package controller
 
 import (
-	"fmt"
 	"html/template"
-	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -11,33 +9,36 @@ import (
 
 // Обработчик для отображения содержимого log check net.
 func (c *Controller) GetLogCheckNet(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles(filesCheck...)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	err = ts.Execute(w, nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-	}
 
 	if r.Method == "GET" {
-		response := ""
-
-		for _, user := range c.usecase.GetLogCheckNet() {
-			response += fmt.Sprintf("-     %v %v %v %v %v %v <br/>", user.Time, user.Text, user.City, user.Office, user.Server, user.Ip)
+		ts, err := template.ParseFiles(filesCheck...)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error", 500)
+			return
+		}
+		err = ts.Execute(w, nil)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error", 500)
 		}
 
-		_, err = io.WriteString(w, `<html><head><title>Проверка веб-службы</title></head><body><p>&nbsp;</p><h1 style="text-align: left;"><span style="color: #339966;"><strong>
-		  Лог проверки сети:</strong></span></h1><div></div></body></html>`)
+		log := c.usecase.GetLogCheckNet()
+
+		//указываем путь к файлу с шаблоном
+		tmpl, err := template.ParseFiles("../internal/ui/templates/log_check_ip.html")
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		//исполняем именованный шаблон "check_ip.html", передавая туда массив со списком пользователей
+		err = tmpl.ExecuteTemplate(w, "log_check_ip", log)
+		if err != nil {
+			http.Error(w, err.Error(), 400)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(response))
+
 		return
 	}
 	w.WriteHeader(http.StatusBadRequest)
@@ -45,34 +46,37 @@ func (c *Controller) GetLogCheckNet(w http.ResponseWriter, r *http.Request) {
 
 // Обработчик для отображения содержимого log check net city.
 func (c *Controller) GetLogCheckNetCity(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles(filesCheck...)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	err = ts.Execute(w, nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-	}
 
 	if r.Method == "GET" {
-		response := ""
-
-		city := strings.TrimPrefix(r.URL.Path, "/check_net/")
-		for _, user := range c.usecase.GetLogCheckNetCity(city) {
-			response += fmt.Sprintf("-     %v %v %v %v %v %v <br/>", user.Time, user.Text, user.City, user.Office, user.Server, user.Ip)
-		}
-
-		_, err = io.WriteString(w, fmt.Sprintf(`<html><head><title>Проверка веб-службы</title></head><body><p>&nbsp;</p><h1 style="text-align: left;"><span style="color: #339966;"><strong>
-		  	 Лог проверки сети по офису %s: </strong></span></h1><div></div></body></html>`, city))
+		ts, err := template.ParseFiles(filesCheck...)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error", 500)
 			return
 		}
+		err = ts.Execute(w, nil)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error", 500)
+		}
+
+		city := strings.TrimPrefix(r.URL.Path, "/check_net/")
+		log := c.usecase.GetLogCheckNetCity(city)
+
+		//указываем путь к файлу с шаблоном
+		tmpl, err := template.ParseFiles("../internal/ui/templates/log_check_ip_city.html")
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		//исполняем именованный шаблон, передавая туда массив со списком пользователей
+		err = tmpl.ExecuteTemplate(w, "log_check_ip_city", log)
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(response))
 		return
 	}
 	w.WriteHeader(http.StatusBadRequest)

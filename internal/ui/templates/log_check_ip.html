@@ -1,0 +1,41 @@
+{{define "log_check_ip"}}
+
+<html lang="ru" class="h-100">
+<head>
+  <title>Лог проверки сети</title>
+</head>
+<body >
+</div>
+</ul><div id="tabs-1"><br><table class="curved-vt-2" width=1600>
+  <td colspan=1 class="table-shapka" width=90%>Лог проверки сети:</td>
+  <td colspan=13 class="table-mcenter1"><img src='/static/img/terminal2.png' width="30"></td>
+
+</div>
+</table><br>
+<table align=center class="curved-vt-2" width=60%>
+
+  <th>Дата</th>
+  <th>Сообщение</th>
+  <th>Город</th>
+  <th>Офис</th>
+  <th>Устройство</th>
+  <th>IP</th>
+
+
+  {{range .}}
+  <tr>
+    <td>{{.Time}}</td>
+    <td>{{.Text}}</td>
+    <td>{{.City}}</td>
+    <td>{{.Office}}</td>
+    <td>{{.Server}}</td>
+    <td>{{.Ip}}</td>
+
+
+  </tr>
+  {{end}}
+</table>
+</body>
+</html>
+{{end}}
+

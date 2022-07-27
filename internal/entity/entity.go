@@ -24,9 +24,3 @@ type CheckNetLog struct {
 	Server string `json:"server"`
 	Text   string `json:"text"`
 }
-
-const (
-	UserSql = "usersql"
-	PassSql = "Nomu8@RAmBat"
-	HostSql = "10.101.2.194:3306"
-)

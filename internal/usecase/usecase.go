@@ -10,6 +10,8 @@ type (
 		GetLogCheckNet() []*entity.CheckNetLog
 		GetLogCheckNetCity(string) []*entity.CheckNetLog
 		EditCheckIp(ipCheck *entity.Ipcheck) error
+		GetIpCheckId(string) (*entity.Ipcheck, error)
+		DeleteIpCheck(string) error
 	}
 
 	Repository interface {
@@ -19,6 +21,8 @@ type (
 		GetLogCheckNet() []*entity.CheckNetLog
 		GetLogCheckNetCity(string) []*entity.CheckNetLog
 		EditCheckIp(ipCheck *entity.Ipcheck) error
+		GetIpCheckId(string) (*entity.Ipcheck, error)
+		DeleteIpCheck(string) error
 	}
 )
 
@@ -38,7 +42,7 @@ func (u *usecase) AddNewIp(user *entity.Ipcheck) (uint8, error) {
 	return uid, error
 }
 
-// GetAll return check_ip
+// GetAll return check_ip.html
 func (u *usecase) GetAll() []*entity.Ipcheck {
 	users := u.repository.GetAll()
 	return users
@@ -64,5 +68,15 @@ func (u *usecase) GetLogCheckNetCity(city string) []*entity.CheckNetLog {
 
 func (u *usecase) EditCheckIp(ipCheck *entity.Ipcheck) error {
 	err := u.repository.EditCheckIp(ipCheck)
+	return err
+}
+
+func (u *usecase) GetIpCheckId(id string) (*entity.Ipcheck, error) {
+	ip, err := u.repository.GetIpCheckId(id)
+	return ip, err
+}
+
+func (u *usecase) DeleteIpCheck(id string) error {
+	err := u.repository.DeleteIpCheck(id)
 	return err
 }

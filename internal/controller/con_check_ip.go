@@ -2,9 +2,9 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
+	"strings"
+
 	"html/template"
-	"io"
 	"log"
 	"net/http"
 	"project/test_site/internal/entity"
@@ -59,35 +59,35 @@ func (c *Controller) AddNewIp(w http.ResponseWriter, r *http.Request) {
 
 // Обработчик для отображения проверяемых ip.
 func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles(filesCheck...)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	err = ts.Execute(w, nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-	}
 
 	if r.Method == "GET" {
-		response := ""
 
-		for _, user := range c.usecase.GetAll() {
-			response += fmt.Sprintf("-     id:%v %v %s %s %v<br/>", user.Id, user.Ip, user.Office, user.City, user.Server)
-		}
-
-		http.ServeFile(w, r, "../internal/ui/templates/button_add_ip.html")
+		ts, err := template.ParseFiles(filesCheck...)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error", 500)
 			return
 		}
+		err = ts.Execute(w, nil)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error", 500)
+		}
 
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(response))
+		checkIp := c.usecase.GetAll()
 
-		return
+		//указываем путь к файлу с шаблоном
+		tmpl, err := template.ParseFiles("../internal/ui/templates/check_ip.html")
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		//исполняем именованный шаблон "check_ip.html", передавая туда массив со списком пользователей
+		err = tmpl.ExecuteTemplate(w, "check_ip", checkIp)
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
 	}
 	w.WriteHeader(http.StatusBadRequest)
 }
@@ -108,9 +108,6 @@ func (c *Controller) AddNewIpForm(w http.ResponseWriter, r *http.Request) {
 		newIp.City = r.FormValue("city")
 		newIp.Server = r.FormValue("device")
 
-		if err != nil {
-			log.Println(err)
-		}
 		_, err = c.usecase.AddNewIp(newIp)
 		if err != nil {
 			buildResponse(w, http.StatusInternalServerError, nil)
@@ -119,11 +116,17 @@ func (c *Controller) AddNewIpForm(w http.ResponseWriter, r *http.Request) {
 
 		http.Redirect(w, r, "/ip", 301)
 	} else {
-		_, err := io.WriteString(w, `<html><head><title>Проверка веб-службы</title>
-			</head><body><p>&nbsp;</p><h1 style="text-align: left;">
-			<span style="color: #339966;"><strong>Добавление IP:</strong></span>
-			</h1><div></div></body>
-			</html>`)
+		ts, err := template.ParseFiles(filesCheck...)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		err = ts.Execute(w, nil)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), 500)
+		}
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -133,7 +136,7 @@ func (c *Controller) AddNewIpForm(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Обработчик edit-ip Ceck net.
+// Обработчик edit ip-Ceck net.
 func (c *Controller) EditCheckIp(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
@@ -164,17 +167,56 @@ func (c *Controller) EditCheckIp(w http.ResponseWriter, r *http.Request) {
 		}
 
 		http.Redirect(w, r, "/ip", 301)
-	} else {
-		_, err := io.WriteString(w, `<html><head><title>Проверка веб-службы</title>
-			</head><body><p>&nbsp;</p><h1 style="text-align: left;">
-			<span style="color: #339966;"><strong>Редактирование IP:</strong></span>
-			</h1><div></div></body>
-			</html>`)
+
+	}
+	w.WriteHeader(http.StatusBadRequest)
+
+}
+
+// возвращаем пользователю страницу для редактирования объекта ip-Ceck net.
+func (c *Controller) EditPageCheckIp(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles(filesCheck...)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), 500)
+	}
+
+	if r.Method == "GET" {
+		id := strings.TrimPrefix(r.URL.Path, "/edit/")
+
+		ipCheck, err := c.usecase.GetIpCheckId(id)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Println(err)
+			http.Error(w, http.StatusText(404), http.StatusNotFound)
+		} else {
+			tmpl, _ := template.ParseFiles("../internal/ui/templates/edit_check_ip.html")
+			tmpl.Execute(w, ipCheck)
+		}
+	}
+	w.WriteHeader(http.StatusBadRequest)
+}
+
+// Обработчик удаление ip-check из хранилища.
+func (c *Controller) DeleteIpCheck(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == "GET" {
+		id := strings.TrimPrefix(r.URL.Path, "/delete/")
+
+		err := c.usecase.DeleteIpCheck(id)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, http.StatusText(404), http.StatusNotFound)
 			return
 		}
-		http.ServeFile(w, r, "../internal/ui/templates/edit_check_ip.html")
+
+		http.Redirect(w, r, "/ip", 301)
 	}
+	w.WriteHeader(http.StatusBadRequest)
 
 }
